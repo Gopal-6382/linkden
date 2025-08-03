@@ -1,37 +1,228 @@
 import { useState } from 'react';
-import api from '../utils/api.js';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 
 const Register = () => {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ 
+    name: '', 
+    email: '', 
+    password: '',
+    confirmPassword: '' 
+  });
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState('');
   const navigate = useNavigate();
 
   const handleChange = e => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!form.name.trim()) newErrors.name = 'Name is required';
+    if (!form.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    if (!form.password) {
+      newErrors.password = 'Password is required';
+    } else if (form.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    if (form.password !== form.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async e => {
     e.preventDefault();
+    setServerError('');
+    
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
     try {
-      const res = await api.post('/auth/sign-up', form);
-      alert(res.data.message);
+      const { confirmPassword, ...submitData } = form;
+      const res = await api.post('/auth/sign-up', submitData);
+      
+      // Show success message and redirect
+      setServerError(''); // Clear any previous errors
+      alert(res.data.message || 'Registration successful!');
       navigate('/login');
     } catch (err) {
-      alert(err.response?.data?.error || 'Registration failed');
+      setServerError(err.response?.data?.error || 'Registration failed. Please try again.');
+      console.error('Registration error:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="card mx-auto" style={{ maxWidth: 400 }}>
-      <div className="card-body">
-        <h3 className="card-title text-center">Register</h3>
-        <form onSubmit={handleSubmit}>
-          <input className="form-control my-2" placeholder="Name" name="name" value={form.name} onChange={handleChange} />
-          <input className="form-control my-2" placeholder="Email" name="email" value={form.email} onChange={handleChange} />
-          <input className="form-control my-2" placeholder="Password" name="password" type="password" value={form.password} onChange={handleChange} />
-          <button className="btn btn-primary w-100 mt-2">Register</button>
-        </form>
+    <div className="container py-5">
+      <div className="row justify-content-center">
+        <div className="col-md-8 col-lg-6 col-xl-5">
+          <div className="card border-0 shadow-sm rounded-3 overflow-hidden">
+            <div className="card-header bg-primary text-white py-4">
+              <h2 className="text-center mb-0">Join MiniLinkedIn</h2>
+              <p className="text-center mb-0 opacity-75">Create your professional account</p>
+            </div>
+            
+            <div className="card-body p-4 p-md-5">
+              {serverError && (
+                <div className="alert alert-danger d-flex align-items-center" role="alert">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  <div>{serverError}</div>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} className="needs-validation" noValidate>
+                <div className="mb-3">
+                  <label htmlFor="name" className="form-label">Full Name</label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-person"></i>
+                    </span>
+                    <input
+                      id="name"
+                      className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                      type="text"
+                      name="name"
+                      placeholder="Enter your full name"
+                      value={form.name}
+                      onChange={handleChange}
+                      required
+                    />
+                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label">Email Address</label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-envelope"></i>
+                    </span>
+                    <input
+                      id="email"
+                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                      type="email"
+                      name="email"
+                      placeholder="Enter your email"
+                      value={form.email}
+                      onChange={handleChange}
+                      required
+                    />
+                    {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+                  </div>
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label">Password</label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-lock"></i>
+                    </span>
+                    <input
+                      id="password"
+                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                      type="password"
+                      name="password"
+                      placeholder="Create a password (min 6 characters)"
+                      value={form.password}
+                      onChange={handleChange}
+                      required
+                    />
+                    {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                  <div className="input-group">
+                    <span className="input-group-text">
+                      <i className="bi bi-lock-fill"></i>
+                    </span>
+                    <input
+                      id="confirmPassword"
+                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
+                      type="password"
+                      name="confirmPassword"
+                      placeholder="Confirm your password"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      required
+                    />
+                    {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword}</div>}
+                  </div>
+                </div>
+
+                <button 
+                  className="btn btn-primary w-100 py-2 mb-3 rounded-pill" 
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Registering...
+                    </>
+                  ) : (
+                    'Create Account'
+                  )}
+                </button>
+
+                <div className="text-center mt-4">
+                  <p className="mb-0 text-muted">
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-decoration-none fw-bold">
+                      Sign in
+                    </Link>
+                  </p>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Add this CSS in your global styles or style tag */}
+      <style>{`
+        .card {
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .input-group-text {
+          background-color: #f8f9fa;
+        }
+        
+        .btn-primary {
+          background-color: #0a66c2;
+          border-color: #0a66c2;
+        }
+        
+        .btn-primary:hover {
+          background-color: #004182;
+          border-color: #004182;
+        }
+        
+        .rounded-3 {
+          border-radius: 0.75rem !important;
+        }
+      `}</style>
     </div>
   );
 };
