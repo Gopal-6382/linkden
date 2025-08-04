@@ -7,6 +7,7 @@ import Header from './Components/Header';
 import NotFound from './pages/NotFound';
 import './Scss/Main.scss';
 import CreatePost from './pages/CreatePost';
+import UserProfile from './pages/UserProfile';
 
 function App() {
   return (
@@ -14,17 +15,16 @@ function App() {
       <Header />
       <div className="container mt-4">
         <Routes>
-          {/* Basic routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/create-post" element={<CreatePost />} />
+  <Route path="/" element={<Home />} />
+  <Route path="/login" element={<Login />} />
+  <Route path="/register" element={<Register />} />
+  <Route path="/profile" element={<Profile />} />
+  <Route path="/create-post" element={<CreatePost />} />
+  <Route path="/user/:id" element={<UserProfile />} /> {/* ✅ Add this line */}
+  <Route path="/404" element={<NotFound />} />
+  <Route path="*" element={<Navigate to="/404" replace />} />
+</Routes>
 
-          {/* 404 handling */}
-          <Route path="/404" element={<NotFound />} />
-          <Route path="*" element={<Navigate to="/404" replace />} />
-        </Routes>
       </div>
     </Router>
   );
