@@ -6,6 +6,7 @@ import Profile from './pages/Profile';
 import Header from './Components/Header';
 import NotFound from './pages/NotFound';
 import './Scss/Main.scss';
+import CreatePost from './pages/CreatePost';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/create-post" element={<CreatePost />} />
 
           {/* 404 handling */}
           <Route path="/404" element={<NotFound />} />

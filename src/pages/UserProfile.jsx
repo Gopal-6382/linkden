@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import axios from "axios";
 
 function UserProfile() {
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
@@ -15,18 +15,20 @@ function UserProfile() {
       try {
         setLoading(true);
         const [userRes, postsRes] = await Promise.all([
-          axios.get(`http://localhost:5500/api/v1/users/${id}`),
-          axios.get(`http://localhost:5500/api/v1/posts/user/${id}`)
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/v1/users/${id}`),
+          axios.get(
+            `${import.meta.env.VITE_API_BASE_URL}/api/v1/posts/user/${id}`
+          ),
         ]);
 
         setUser(userRes.data.user);
         setPosts(postsRes.data.posts);
-        
+
         // Check if current user is following this profile
         // You'll need to implement this based on your backend
         // setIsFollowing(res.data.isFollowing);
       } catch (err) {
-        setError(err.response?.data?.message || 'Failed to fetch user profile');
+        setError(err.response?.data?.message || "Failed to fetch user profile");
         console.error(err);
       } finally {
         setLoading(false);
@@ -43,7 +45,7 @@ function UserProfile() {
       // setIsFollowing(res.data.isFollowing);
       setIsFollowing(!isFollowing);
     } catch (err) {
-      console.error('Follow error:', err);
+      console.error("Follow error:", err);
     }
   };
 
@@ -81,20 +83,28 @@ function UserProfile() {
         <div className="col-lg-4 mb-4">
           <div className="card shadow-sm h-100">
             <div className="card-body text-center">
-              <div className="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" 
-                   style={{ width: '120px', height: '120px', fontSize: '3rem' }}>
+              <div
+                className="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                style={{ width: "120px", height: "120px", fontSize: "3rem" }}
+              >
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
-              
+
               <h3 className="mb-1">{user?.name}</h3>
               <p className="text-muted mb-3">{user?.email}</p>
-              
+
               <p className="text-start mb-4">
-                {user?.bio || <span className="text-muted fst-italic">No bio available</span>}
+                {user?.bio || (
+                  <span className="text-muted fst-italic">
+                    No bio available
+                  </span>
+                )}
               </p>
 
-              <button 
-                className={`btn ${isFollowing ? 'btn-outline-secondary' : 'btn-primary'} w-100`}
+              <button
+                className={`btn ${
+                  isFollowing ? "btn-outline-secondary" : "btn-primary"
+                } w-100`}
                 onClick={handleFollow}
               >
                 {isFollowing ? (
@@ -118,17 +128,23 @@ function UserProfile() {
             <div className="card-header bg-white">
               <h5 className="mb-0">Posts by {user?.name}</h5>
             </div>
-            
+
             <div className="card-body">
               {posts.length === 0 ? (
                 <div className="text-center py-4">
-                  <i className="bi bi-newspaper text-muted" style={{ fontSize: '3rem' }}></i>
+                  <i
+                    className="bi bi-newspaper text-muted"
+                    style={{ fontSize: "3rem" }}
+                  ></i>
                   <p className="text-muted mt-3">No posts from this user yet</p>
                 </div>
               ) : (
                 <div className="list-group list-group-flush">
                   {posts.map((post) => (
-                    <div className="list-group-item border-0 py-3" key={post._id}>
+                    <div
+                      className="list-group-item border-0 py-3"
+                      key={post._id}
+                    >
                       <div className="d-flex align-items-center mb-2">
                         <div className="flex-grow-1">
                           <p className="mb-1">{post.content}</p>

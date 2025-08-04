@@ -20,12 +20,13 @@ function CreatePost() {
     setLoading(true);
     try {
       await axios.post(
-        'http://localhost:5500/api/v1/posts',
-        { content },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+  `${import.meta.env.VITE_API_BASE_URL}/api/v1/posts`,
+  { content },
+  {
+    headers: { Authorization: `Bearer ${token}` },
+  }
+);
+
       setContent('');
       navigate('/');
     } catch (err) {

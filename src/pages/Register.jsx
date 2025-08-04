@@ -9,6 +9,7 @@ const Register = () => {
     password: '',
     confirmPassword: '' 
   });
+
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState('');
@@ -17,7 +18,8 @@ const Register = () => {
   const handleChange = e => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
-    // Clear error when user types
+
+    // Clear errors while typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -25,20 +27,25 @@ const Register = () => {
 
   const validateForm = () => {
     const newErrors = {};
+
     if (!form.name.trim()) newErrors.name = 'Name is required';
+
     if (!form.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       newErrors.email = 'Email is invalid';
     }
+
     if (!form.password) {
       newErrors.password = 'Password is required';
     } else if (form.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
+
     if (form.password !== form.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -46,16 +53,14 @@ const Register = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     setServerError('');
-    
+
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     try {
-      const { confirmPassword, ...submitData } = form;
+      const { confirmPassword, ...submitData } = form; // 👈 confirmPassword is excluded intentionally
       const res = await api.post('/auth/sign-up', submitData);
-      
-      // Show success message and redirect
-      setServerError(''); // Clear any previous errors
+
       alert(res.data.message || 'Registration successful!');
       navigate('/login');
     } catch (err) {
@@ -75,7 +80,7 @@ const Register = () => {
               <h2 className="text-center mb-0">Join MiniLinkedIn</h2>
               <p className="text-center mb-0 opacity-75">Create your professional account</p>
             </div>
-            
+
             <div className="card-body p-4 p-md-5">
               {serverError && (
                 <div className="alert alert-danger d-flex align-items-center" role="alert">
@@ -84,7 +89,8 @@ const Register = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="needs-validation" noValidate>
+              <form onSubmit={handleSubmit} noValidate>
+                {/* Full Name */}
                 <div className="mb-3">
                   <label htmlFor="name" className="form-label">Full Name</label>
                   <div className="input-group">
@@ -93,9 +99,9 @@ const Register = () => {
                     </span>
                     <input
                       id="name"
-                      className={`form-control ${errors.name ? 'is-invalid' : ''}`}
-                      type="text"
                       name="name"
+                      type="text"
+                      className={`form-control ${errors.name ? 'is-invalid' : ''}`}
                       placeholder="Enter your full name"
                       value={form.name}
                       onChange={handleChange}
@@ -105,6 +111,7 @@ const Register = () => {
                   </div>
                 </div>
 
+                {/* Email */}
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">Email Address</label>
                   <div className="input-group">
@@ -113,9 +120,9 @@ const Register = () => {
                     </span>
                     <input
                       id="email"
-                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                      type="email"
                       name="email"
+                      type="email"
+                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                       placeholder="Enter your email"
                       value={form.email}
                       onChange={handleChange}
@@ -125,6 +132,7 @@ const Register = () => {
                   </div>
                 </div>
 
+                {/* Password */}
                 <div className="mb-3">
                   <label htmlFor="password" className="form-label">Password</label>
                   <div className="input-group">
@@ -133,10 +141,10 @@ const Register = () => {
                     </span>
                     <input
                       id="password"
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                      type="password"
                       name="password"
-                      placeholder="Create a password (min 6 characters)"
+                      type="password"
+                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                      placeholder="Create a password"
                       value={form.password}
                       onChange={handleChange}
                       required
@@ -145,6 +153,7 @@ const Register = () => {
                   </div>
                 </div>
 
+                {/* Confirm Password */}
                 <div className="mb-4">
                   <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
                   <div className="input-group">
@@ -153,9 +162,9 @@ const Register = () => {
                     </span>
                     <input
                       id="confirmPassword"
-                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
-                      type="password"
                       name="confirmPassword"
+                      type="password"
+                      className={`form-control ${errors.confirmPassword ? 'is-invalid' : ''}`}
                       placeholder="Confirm your password"
                       value={form.confirmPassword}
                       onChange={handleChange}
@@ -172,7 +181,7 @@ const Register = () => {
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      <span className="spinner-border spinner-border-sm me-2"></span>
                       Registering...
                     </>
                   ) : (
@@ -183,9 +192,7 @@ const Register = () => {
                 <div className="text-center mt-4">
                   <p className="mb-0 text-muted">
                     Already have an account?{' '}
-                    <Link to="/login" className="text-decoration-none fw-bold">
-                      Sign in
-                    </Link>
+                    <Link to="/login" className="text-decoration-none fw-bold">Sign in</Link>
                   </p>
                 </div>
               </form>
@@ -194,31 +201,25 @@ const Register = () => {
         </div>
       </div>
 
-      {/* Add this CSS in your global styles or style tag */}
       <style>{`
         .card {
           transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        
         .card:hover {
           transform: translateY(-2px);
           box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
         }
-        
         .input-group-text {
           background-color: #f8f9fa;
         }
-        
         .btn-primary {
           background-color: #0a66c2;
           border-color: #0a66c2;
         }
-        
         .btn-primary:hover {
           background-color: #004182;
           border-color: #004182;
         }
-        
         .rounded-3 {
           border-radius: 0.75rem !important;
         }

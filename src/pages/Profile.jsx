@@ -12,6 +12,8 @@ function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
 
+  const API = import.meta.env.VITE_API_BASE_URL;
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -22,17 +24,21 @@ function Profile() {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const [userRes, postRes] = await Promise.all([
-          axios.get('http://localhost:5500/api/v1/users/me', {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`http://localhost:5500/api/v1/posts/user/${token ? JSON.parse(localStorage.getItem('user'))._id : ''}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-        ]);
 
-        setUser(userRes.data.user);
-        setBio(userRes.data.user.bio || '');
+        // Get user
+        const userRes = await axios.get(`${API}/api/v1/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const currentUser = userRes.data.user;
+        setUser(currentUser);
+        setBio(currentUser.bio || '');
+
+        // Then get posts for this user
+        const postRes = await axios.get(`${API}/api/v1/posts/user/${currentUser._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         setPosts(postRes.data.posts);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to load profile.');
@@ -43,14 +49,14 @@ function Profile() {
     };
 
     fetchProfile();
-  }, [navigate]);
+  }, [navigate, API]);
 
   const handleBioSave = async () => {
     try {
       setIsSaving(true);
       const token = localStorage.getItem('token');
       const res = await axios.put(
-        `http://localhost:5500/api/v1/users/${user._id}`,
+        `${API}/api/v1/users/${user._id}`,
         { bio },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -95,10 +101,10 @@ function Profile() {
                    style={{ width: '120px', height: '120px', fontSize: '3rem' }}>
                 {user.name.charAt(0).toUpperCase()}
               </div>
-              
+
               <h3 className="mb-1">{user.name}</h3>
               <p className="text-muted mb-3">{user.email}</p>
-              
+
               {editMode ? (
                 <div className="mt-3">
                   <textarea
@@ -155,7 +161,7 @@ function Profile() {
                 <i className="bi bi-plus-lg me-1"></i> Create Post
               </Link>
             </div>
-            
+
             <div className="card-body">
               {posts.length === 0 ? (
                 <div className="text-center py-4">
@@ -209,7 +215,6 @@ function Profile() {
         </div>
       </div>
 
-      {/* Add this CSS in your global styles or style tag */}
       <style>{`
         .avatar {
           font-weight: 600;
@@ -219,15 +224,15 @@ function Profile() {
         .list-group-item {
           transition: background-color 0.2s ease;
         }
-        
+
         .list-group-item:hover {
           background-color: #f8f9fa;
         }
-        
+
         .dropdown-toggle::after {
           display: none;
         }
-        
+
         .card {
           border-radius: 0.75rem;
           border: 1px solid rgba(0, 0, 0, 0.08);
