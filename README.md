@@ -53,7 +53,7 @@ src
 
 ### 1. Clone the repository
 
-git clone https://github.com/your-username/minilinkedin.git
+git clone https://github.com/Gopal-6382/linkden
 cd minilinkedin/frontend
 2. Install dependencies
 
